@@ -4,7 +4,16 @@ typedef struct {
     char item_name[100];//物品名称
     char category[100];//物品类型
     int quantity;//数量
+    int shelve_id;//存放货架位置
 } Item;
+
+//货架结构体
+typedef struct {
+    int shelve_id;//货架id
+    Item *items;//存放物品
+    int category;//存放物品类型
+    int capacity;//存放容量
+}Shelve;
 
 //用户结构体 
 typedef struct {
@@ -37,11 +46,12 @@ typedef struct {
     int loan_quantity;//借用数量
     int return_quantity;//归还数量
     char time[100];//归还时间
+    char status[100]
 } Loan;
 
 //仓库布局
 typedef struct {
-    int num_vertices;
+    int shelves_id;
     int **edges;
 }Graph;
 

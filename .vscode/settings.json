@@ -1,7 +1,5 @@
 {
-    "C_Cpp.errorSquiggles": "enabled",
-    "files.associations": {
-        "entity.h": "c",
-        "stdlib.h": "c"
+    "code-runner.executorMap": {
+    "c": "gcc -std=c99 $fullFileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt"
     }
 }

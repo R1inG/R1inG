@@ -48,7 +48,6 @@ typedef struct Loan{
     char item_name[100];//物品名称
     int loan_quantity;//借用数量
     int return_quantity;//归还数量
-    char time[100];
     char status[100];
 } Loan;
 

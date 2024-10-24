@@ -1,0 +1,7 @@
+{
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.associations": {
+        "entity.h": "c",
+        "stdlib.h": "c"
+    }
+}

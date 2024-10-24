@@ -1,7 +1,10 @@
+#ifndef __item
+#define __item
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"entity.h"
+#include "entity.h"
 #define MAX 100
 
 /********从文件中读取物品数据*******/
@@ -16,7 +19,7 @@ int readItemsFromFile(Item items[], int maxItems) {
     int count = 0;
     while (fgets(line, sizeof(line), file) && count < maxItems) {
         sscanf(line, "%d,%99[^,],%99[^,],%d", &items[count].item_id, items[count].item_name, items[count].category,&items[count].quantity);
-        count++;
+        count;
     }
 
     fclose(file);
@@ -228,6 +231,7 @@ void updateItem(Item item){
 
 /**************查询物品************* */
 Item *searchItemID(int item_id){
+    int searchID;
 
 }
 
@@ -245,3 +249,5 @@ void sortItemsByQuantity(){
 void sortItemsByName(){
 
 }
+
+#endif

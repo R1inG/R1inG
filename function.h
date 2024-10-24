@@ -1,23 +1,13 @@
-#include "entity.h"
+#ifndef __functions
+#define __functions
+
 #include<stdio.h>
 #include<string.h>
 #include <conio.h>
 #include <windows.h>
 #include <errno.h>
+#include "entity.h"
 #define MAX 100
-
-// void registerUser(User user){
-
-// }
-// User *loginUser(char *username, char *password){
-
-// }
-// void updateUser(User user){
-
-// }
-// void changeUserType(char userName[MAX], char userType[MAX]){
-    
-// }
 
 /********输入密码******** */
 void inputPassword(char *password) {
@@ -400,3 +390,5 @@ void changeUserType()
     }
     
 }
+
+#endif

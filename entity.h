@@ -13,9 +13,10 @@ typedef struct Item{
 //货架结构体
 typedef struct Shelve{
     int shelve_id;//货架id
-    Item *items;//存放物品
-    int category;//存放物品类型
-    int capacity;//存放容量
+    //Item items[100];//存放物品
+    //char category[100];//存放物品类型
+    int StorCapacity;//可存放容量
+    int ActualCapacity;//实际容量
 }Shelve;
 
 //用户结构体 

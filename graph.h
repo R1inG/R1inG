@@ -85,6 +85,7 @@ void calculateShortestPath(Queue *q) {
     initGraph(graph);
 
     // 动态输入目标货架集合
+    int *shelves=ShelveManager(q);
     int target_shelves[NUM_SHELVES];
     int target_count=ShelveNumber(q);
     if(target_count==-1){
@@ -96,7 +97,7 @@ void calculateShortestPath(Queue *q) {
     
     printf("请输入目标货架编号（1 到 7）：");
     for (int i = 0; i < target_count; i++) {
-        scanf("%d", &target_shelves[i]);
+        target_shelves[i]=shelves[i];
     }
 
     // 创建目标货架集合的掩码
@@ -123,4 +124,3 @@ void calculateShortestPath(Queue *q) {
     free(graph->edges);
     free(graph);
 }
-

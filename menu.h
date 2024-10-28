@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include"Item_function.h"
+#include"user_function.h"
+
 
 // 物品管理子菜单
 void itemManagementMenu() {
@@ -10,16 +10,18 @@ void itemManagementMenu() {
         printf("1. 添加物品\n");
         printf("2. 删除物品\n");
         printf("3. 修改物品\n");
-        printf("4. 查询物品\n");
-        printf("5. 物品排序\n");
-        printf("6. 返回上一级菜单\n");
+        printf("4. 查询物品(ID)\n");
+        printf("5. 查询物品(名称)\n");
+        printf("6. 物品排序(数量)\n");
+        printf("7. 物品排序(首字母)\n");
+        printf("8. 返回上一级菜单\n");
         printf("请输入选项：");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
                 printf("添加物品功能\n");
-                // addNewItem();
+                addItem();
                 break;
             case 2:
                 printf("删除物品功能\n");
@@ -27,23 +29,31 @@ void itemManagementMenu() {
                 break;
             case 3:
                 printf("修改物品功能\n");
-                // modifyItem();
+                updateItem();
                 break;
             case 4:
-                printf("查询物品功能\n");
-                // searchItem();
+                printf("通过ID查询物品功能\n");
+                searchItemByID();
                 break;
             case 5:
-                printf("物品排序功能\n");
-                // sortItems();
+                printf("通过名称查找物品功能\n");
+                searchItemName();
                 break;
             case 6:
+                printf("通过物品数量排序功能\n");
+                sortItemsByQuantity();
+                break;
+            case 7:
+                printf("通过物品首字母排序功能\n");
+                sortItemsByName();
+                break;
+            case 8:
                 printf("返回上一级菜单\n");
                 break;
             default:
                 printf("无效选项，请重新选择。\n");
         }
-    } while (choice != 6);  // 选择6时返回上一级菜单
+    } while (choice!=8);  // 选择8时返回上一级菜单
 }
 
 // 货架管理子菜单
@@ -51,43 +61,33 @@ void shelfManagementMenu() {
     int choice=0;
     do {
         printf("\n货架管理：\n");
-        printf("1. 添加货架\n");
-        printf("2. 删除货架\n");
-        printf("3. 修改货架\n");
-        printf("4. 返回上一级菜单\n");
+        printf("1. 查询货架种类\n");
+        printf("2. 返回上一级菜单\n");
         printf("请输入选项：");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                printf("添加货架功能\n");
-                // addShelf();
+                printf("查询货架功能\n");
+                searchShelves();
                 break;
             case 2:
-                printf("删除货架功能\n");
-                // deleteShelf();
-                break;
-            case 3:
-                printf("修改货架功能\n");
-                // modifyShelf();
-                break;
-            case 4:
                 printf("返回上一级菜单\n");
                 break;
             default:
                 printf("无效选项，请重新选择。\n");
         }
-    } while (choice != 4);  // 选择4时返回上一级菜单
+    } while (choice != 2);  // 选择2时返回上一级菜单
 }
 
-// 用户管理子菜单
-void userManagementMenu() {
+// 用户管理（管理员）子菜单
+void admUserManagementMenu() {
     int choice=0;
     do {
         printf("\n用户管理：\n");
         printf("1. 添加用户\n");
-        printf("2. 删除用户\n");
-        printf("3. 修改用户\n");
+        printf("2. 修改用户密码\n");
+        printf("3. 修改用户类型\n");
         printf("4. 查询用户\n");
         printf("5. 返回上一级菜单\n");
         printf("请输入选项：");
@@ -96,19 +96,19 @@ void userManagementMenu() {
         switch (choice) {
             case 1:
                 printf("添加用户功能\n");
-                // addUser();
+                Register();
                 break;
             case 2:
-                printf("删除用户功能\n");
-                // deleteUser();
+                printf("修改用户密码功能\n");
+                admChangePassword();
                 break;
             case 3:
-                printf("修改用户功能\n");
-                // modifyUser();
+                printf("修改用户类型功能\n");
+                changeUserType();
                 break;
             case 4:
                 printf("查询用户功能\n");
-                // searchUser();
+                searchUserByUserName();
                 break;
             case 5:
                 printf("返回上一级菜单\n");
@@ -118,6 +118,7 @@ void userManagementMenu() {
         }
     } while (choice != 5);  // 选择5时返回上一级菜单
 }
+
 
 // 借还管理子菜单
 void borrowReturnManagementMenu() {
@@ -232,7 +233,7 @@ void adminMenu() {
                 shelfManagementMenu();  // 进入货架管理子菜单
                 break;
             case 3:
-                userManagementMenu();  // 进入用户管理子菜单
+                admUserManagementMenu();  // 进入用户管理(管理员)子菜单
                 break;
             case 4:
                 printf("物品借还管理功能\n");
@@ -263,7 +264,8 @@ void studentMenu() {
         printf("1. 物品借还管理\n");
         printf("2. 仓库布局和导航\n");
         printf("3. 数据统计和可视化\n");
-        printf("4. 退出登录\n");
+        printf("4. 修改用户密码\n");
+        printf("5. 退出登录\n");
         printf("请输入选项：");
         scanf("%d", &choice);
 
@@ -278,10 +280,13 @@ void studentMenu() {
                 dataStatisticsAndVisualization();
                 break;
             case 4:
+                stuChangePassword();
+                break;
+            case 5:
                 printf("已退出登录。\n");
                 break;
             default:
                 printf("无效选项，请重新选择。\n");
         }
-    } while (choice != 4);  // 选择4时退出登录
+    } while (choice != 5);  // 选择4时退出登录
 }

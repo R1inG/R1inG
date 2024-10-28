@@ -16,7 +16,7 @@ void showQueue(Queue *q);
 //保存队列到文本
  void saveQueueToFile(char *filename, Queue *q);
  //从文本中读取队列
- void readQueueToFile(char *filename, Queue *q);
+ void readQueueFromFile(char *filename, Queue *q);
 //入列
 void enqueue(Queue *q, int item_id, const char *item_name, const char *user_name, int quantity);
 //用户借用请求
@@ -40,7 +40,7 @@ int searchLoanItem(char *filename, char *item_name);
 
 //初始化队列
 void initQueue(Queue* queue){
-    queue->front = queue->front = NULL;
+    queue->front = queue->rear = NULL;
 }
 //判断队列是否为空
 int isQueueEmpty(Queue* queue){
@@ -49,9 +49,8 @@ int isQueueEmpty(Queue* queue){
 //展示当前队列数据
 void showQueue(Queue *q){
     QueueNode *p = q->front;
-    int i = 1;
     while(p != NULL){
-        printf("%d:用户：%s, 物品：%s , 物品id: %d, 数量: %d\n",i,p->user_name,p->item_id,p->item_name,p->quantity);
+        printf("用户：%s, 物品：%s , 物品id: %d, 数量: %d\n",p->user_name,p->item_name,p->item_id,p->quantity);
         p=p->next;
     }
 }
@@ -79,6 +78,39 @@ void dequeue(Queue *q) {
     else{
         printf("Queue is empty!\n");
     }
+}
+//队列中物品所在的货架
+int ShelveNumber(Queue* q) {
+    if (isQueueEmpty(q)) {
+        printf("Queue is empty!\n");
+        return -1;
+    }
+    
+    int locateShelve[8]={0}; // 存储货架ID
+    Item items[100]; // 假设这是从文件中读取的物品列表
+    int number = readItemsFromFile(items, 100); // 读取物品信息
+    QueueNode* current = q->front; // 使用临时指针遍历队列
+    while (current != NULL) {
+        for (int i = 0; i < number; i++) {
+            // 使用 strcmp 进行字符串比较
+            if (strcmp(items[i].item_name, current->item_name) == 0) {
+                locateShelve[items[i].shelve_id] = 1; // 找到对应货架ID
+                break; // 找到后可提前退出内层循环
+            }
+        }
+        current = current->next; // 移动到下一个节点
+    }
+    int count = 0;
+    // 打印所有找到的货架ID
+    printf("队列中所有物品所在货架ID:");
+    for (int i = 1; i < 8; i++) {
+        if(locateShelve[i]==1){
+            printf("%d ", i);
+            count++;
+        }
+    }
+    printf("\n");
+    return count;
 }
 
 // 保存队列到文本中

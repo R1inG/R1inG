@@ -9,6 +9,16 @@
 
 
 int main(void) {
+    printf("***********欢迎来到仓库管理系统************\n");
+    int type=login();
+    if(type==0)//进入学生
+    {
+        studentMenu();
+    }
+    if(type==1)
+    {
+        adminMenu();
+    }
     return 0;
 }
 

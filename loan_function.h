@@ -16,7 +16,7 @@ void showQueue(Queue *q);
 //保存队列到文本
  void saveQueueToFile(char *filename, Queue *q);
  //从文本中读取队列
- void readQueueFromFile(char *filename, Queue *q);
+ void readQueueToFile(char *filename, Queue *q);
 //入列
 void enqueue(Queue *q, int item_id, const char *item_name, const char *user_name, int quantity);
 //用户借用请求
@@ -79,39 +79,6 @@ void dequeue(Queue *q) {
         printf("Queue is empty!\n");
     }
 }
-//队列中物品所在的货架
-int ShelveNumber(Queue* q) {
-    if (isQueueEmpty(q)) {
-        printf("Queue is empty!\n");
-        return -1;
-    }
-    
-    int locateShelve[8]={0}; // 存储货架ID
-    Item items[100]; // 假设这是从文件中读取的物品列表
-    int number = readItemsFromFile(items, 100); // 读取物品信息
-    QueueNode* current = q->front; // 使用临时指针遍历队列
-    while (current != NULL) {
-        for (int i = 0; i < number; i++) {
-            // 使用 strcmp 进行字符串比较
-            if (strcmp(items[i].item_name, current->item_name) == 0) {
-                locateShelve[items[i].shelve_id] = 1; // 找到对应货架ID
-                break; // 找到后可提前退出内层循环
-            }
-        }
-        current = current->next; // 移动到下一个节点
-    }
-    int count = 0;
-    // 打印所有找到的货架ID
-    printf("队列中所有物品所在货架ID:");
-    for (int i = 1; i < 8; i++) {
-        if(locateShelve[i]==1){
-            printf("%d ", i);
-            count++;
-        }
-    }
-    printf("\n");
-    return count;
-}
 
 // 保存队列到文本中
 void saveQueueToFile(char *filename, Queue *q) {
@@ -159,9 +126,9 @@ void borrowRequest(Queue *q) {
     int item_id,borrow_quantity;
     char user_name[100],item_name[100];
     Item items[100];
-    Loan loans[10000];
-
-    int loan_id = readLoanFile("loans.txt",loans,10000);
+    Loan loans[1000];
+    Shelve shelves[100];
+    int loan_id = readLoanFile("loans.txt",loans,1000);
 
     printf("输入你要借的物品id: ");
     scanf("%d",&item_id);
@@ -173,47 +140,95 @@ void borrowRequest(Queue *q) {
     scanf("%d",&borrow_quantity);
 
     int count = readItemsFromFile(items,100);
+    int numShelves=readShelvesFromFile(shelves,100);
     int now_quantity = 0;
+    int index=-1;
     for(int i = 0 ; i < count ; i++){
         if(strcmp(items[i].item_name, item_name)==0)
+        {
             now_quantity += items[i].quantity;
+            index=i;
+            break;
+        }
+            
     }
     if(borrow_quantity > now_quantity) {
         printf("你所借的物品库存量不足!\n");
         return;
     }
+    else if(index==-1)
+    {
+        printf("未找到该物品！\n");
+    }
+    else
+    {
+        items[index].quantity-=borrow_quantity;
+        shelves[items[index].shelve_id-1].ActualCapacity-=borrow_quantity;
+        enqueue(q,item_id, user_name, item_name, borrow_quantity);
+
+        addLoanRecord(loans, loan_id, user_name, item_name, borrow_quantity);
+
+        saveLoanFile("loans.txt",loans,loan_id+1);
+        saveItemsToFile(items,count);
+        saveShelvesFromFile(shelves,numShelves);
+        printf("请记住您的借用码:%d", loan_id);
+    }
     
-    enqueue(q,item_id, user_name, item_name, borrow_quantity);
-
-    addLoanRecord(loans, loan_id, user_name, item_name, borrow_quantity);
-
-    saveLoanFile("loans.txt",loans,10000);
-
-    printf("请记住您的借用码:%d", loan_id);
 }
 //用户归还请求
 void returnRequest(Queue *q) {
     int return_quantity,item_id;
-    int loan_id;
+    Loan loans[1000];
+    Item items[100];
+    int numitems=readItemsFromFile(items,100);
+    Shelve shelves[100];
+    int numshelves=readShelvesFromFile(shelves,100);
+    int loan_id ;
+    int numloans=readLoanFile("loans.txt",loans,1000);;
     char user_name[100],item_name[100];
-    Loan loans[10000];
 
     printf("输入借用码：");
     scanf("%d", &loan_id);
-    printf("输入你要借的物品id: ");
+    printf("请输入物品编号:\n");
     scanf("%d",&item_id);
-    printf("输入你要借的物品名称: ");
-    scanf("%99s",item_name);
-    printf("输入你的用户名: ");
-    scanf("%99s",user_name);
-    printf("输入你要归还的物品数量：");
-    scanf("%d", &return_quantity);
-
-    enqueue(q,item_id,item_name,user_name,return_quantity);
-
-    updateReturnRecord(loans, loan_id, return_quantity);
-
-    saveLoanFile("loans.txt",loans,10000);
+    int index=-1;
+    for(int i=0;i<numloans;i++)
+    {
+        if(loan_id==loans[i].loan_id)
+        {
+            index=i;
+            strcpy(user_name,loans[i].user_name);
+            strcpy(item_name,loans[i].item_name);
+            break;
+        }
+    }
+    if(index==-1)
+    {
+        printf("未找到该借用码记录！\n");
+        return;
+    }
+    else
+    {
+        printf("输入你要归还的物品数量：");
+        scanf("%d", &return_quantity);
+        if(return_quantity>loans[index].loan_quantity)
+        {
+            printf("归还数量多于借用数量！！\n");
+            return;
+        }
+        else
+        {
+            items[item_id-1].quantity+=return_quantity;
+            shelves[items[item_id].shelve_id-2].ActualCapacity+=return_quantity;
+            enqueue(q,item_id,item_name,user_name,return_quantity);
+            updateReturnRecord(loans, loan_id, return_quantity);
+            saveItemsToFile(items,numitems);
+            saveShelvesFromFile(shelves,numshelves);
+            saveLoanFile("loans.txt",loans,numloans);
+        }
+        
+    }
+    
 
 }
 // 添加历史记录
@@ -259,7 +274,7 @@ int readLoanFile(char *filename, Loan loans[], int maxLoans) {
 
     int count = 0;
     while (count < maxLoans) {
-        // 读取一条贷款记录
+        // 读取一条借货记录
         if (fscanf(file, "%d,%99[^,],%99[^,],%d,%d,%99[^\n]",
                    &loans[count].loan_id, loans[count].user_name, loans[count].item_name,
                    &loans[count].loan_quantity, &loans[count].return_quantity, loans[count].status) == 6) {

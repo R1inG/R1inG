@@ -66,7 +66,7 @@ void saveUsersToFile(User users[], int numUsers) {
 }
 /**************登录************* */
 // 登录函数
-bool login(){
+int login(){
     User users[MAX];
     int numUsers = readUsersFromFile(users, MAX);
 
@@ -89,17 +89,17 @@ bool login(){
     }
 
     if (successIndex != -1) {
-        printf("登录成功！\n");
+        printf("\n登录成功！\n");
         if (users[successIndex].user_type == 0) {
              printf("欢迎进入仓库管理系统（学生）");// 学生登录，进入学生系统
-             return true;
+             return 0;
         } else if (users[successIndex].user_type == 1) {
              printf("欢迎进入仓库管理系统（管理员）"); // 管理员登录，进入管理员系统
-             return true;
+             return 1;
         }
     } else {
-        printf("登录失败：用户名或密码错误。\n");
-        return false;
+        printf("\n登录失败：用户名或密码错误。");
+        return -1;
     }
 }
 
@@ -141,7 +141,7 @@ void stuChangePassword(){
     char password[MAX];
     printf("请输入用户名: ");
     scanf("%99s", username);
-    printf("请输入原密码：");
+    printf("\n请输入原密码：");
     inputPassword(password);
     //检查原密码是否正确
     int successIndex = -1;
@@ -153,20 +153,20 @@ void stuChangePassword(){
         }
     }
     if (successIndex != -1) {
-        printf("请输入新密码: ");
+        printf("\n请输入新密码: ");
         // scanf("%99s", password);
     
         inputPassword(newPassword);
         if(updateUserPassword(users, numUsers, username, newPassword)==1)
         {
             saveUsersToFile(users, numUsers);
-            printf("密码更新成功！\n");
+            printf("\n密码更新成功！\n");
         }
         else
-            printf("更新失败！\n");
+            printf("\n更新失败！\n");
     }
      else {
-        printf("密码错误！！！\n");
+        printf("\n密码错误！！！\n");
     }
 }
 
@@ -388,4 +388,30 @@ void changeUserType()
         }
     }
     
+}
+void searchUserByUserName()
+{
+    User users[MAX];
+    int numUsers=readUsersFromFile(users,MAX);
+    char userName[MAX];
+    printf("请输入你要查询的用户名\n");
+    scanf("%99s",userName);
+    int index=-1;
+    for(int i=0;i<numUsers;i++)
+    {
+        if(strcmp(userName,users[i].user_name)==0)
+        {
+            index=i;
+            break;
+        }
+    }
+    if(index==-1)
+    {
+        printf("未找到该用户！\n");
+        return;
+    }
+    else
+    {
+        printf("账户名：%s,密码：%s,用户类型：%d\n",users[index].user_name,users[index].password,users[index].user_type);
+    }
 }

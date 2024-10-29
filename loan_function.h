@@ -16,7 +16,7 @@ void showQueue(Queue *q);
 //保存队列到文本
  void saveQueueToFile(char *filename, Queue *q);
  //从文本中读取队列
- void readQueueFromFile(char *filename, Queue *q);
+ void readQueueToFile(char *filename, Queue *q);
 //入列
 void enqueue(Queue *q, int item_id, const char *item_name, const char *user_name, int quantity);
 //用户借用请求
@@ -70,6 +70,43 @@ void enqueue(Queue *q, int item_id, const char *item_name, const char *user_name
         q->rear = newNode;
     }
 }
+
+// 复制队列中的第i个节点
+QueueNode* copyQueueNodeAtIndex(Queue *q, int i) {
+    if (q == NULL || i <= 0 || isQueueEmpty(q)) {
+        return NULL;
+    }
+
+    int count = 1; // 从队列的第一个节点开始计数
+    QueueNode *current = q->front;
+
+    while (current != NULL && count < i) {
+        current = current->next;
+        count++;
+    }
+
+    if (current == NULL) {
+        // 没有找到第i个节点
+        return NULL;
+    }
+
+    // 复制第i个节点
+    QueueNode *newNode = (QueueNode *)malloc(sizeof(QueueNode));
+    if (newNode == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return NULL;
+    }
+    newNode->item_id = current->item_id;
+    strncpy(newNode->item_name, current->item_name, sizeof(newNode->item_name) - 1);
+    newNode->item_name[sizeof(newNode->item_name) - 1] = '\0';
+    strncpy(newNode->user_name, current->user_name, sizeof(newNode->user_name) - 1);
+    newNode->user_name[sizeof(newNode->user_name) - 1] = '\0';
+    newNode->quantity = current->quantity;
+    newNode->next = NULL;
+
+    return newNode;
+}
+
 //出列
 void dequeue(Queue *q) {
     if(!isQueueEmpty(q)){
@@ -216,26 +253,29 @@ void borrowRequest(Queue *q) {
         }
             
     }
-    if(borrow_quantity > now_quantity) {
-        printf("你所借的物品库存量不足!\n");
-        return;
-    }
-    else if(index==-1)
+    // if(borrow_quantity > now_quantity) {
+    //     printf("你所借的物品库存量不足!\n");
+    //     return;
+    // }
+    // else 
+    if(index==-1)
     {
         printf("未找到该物品！\n");
+        return;
     }
     else
     {
         items[index].quantity-=borrow_quantity;
         shelves[items[index].shelve_id-1].ActualCapacity-=borrow_quantity;
-        enqueue(q,item_id, user_name, item_name, borrow_quantity);
+        enqueue(q,item_id,  item_name,user_name, borrow_quantity);
 
-        addLoanRecord(loans, loan_id, user_name, item_name, borrow_quantity);
+        //addLoanRecord(loans, loan_id, user_name, item_name, borrow_quantity);
 
-        saveLoanFile("loans.txt",loans,loan_id+1);
-        saveItemsToFile(items,count);
-        saveShelvesFromFile(shelves,numShelves);
-        printf("请记住您的借用码:%d", loan_id);
+        //saveLoanFile("loans.txt",loans,loan_id+1);
+        //saveItemsToFile(items,count);
+        //saveShelvesFromFile(shelves,numShelves);
+        // printf("请记住您的借用码:%d\n", loan_id);
+
     }
     
 }
@@ -251,7 +291,7 @@ void returnRequest(Queue *q) {
     int numloans=readLoanFile("loans.txt",loans,1000);;
     char user_name[100],item_name[100];
 
-    printf("输入借用码：");
+    printf("请输入借用码：");
     scanf("%d", &loan_id);
     printf("请输入物品编号:\n");
     scanf("%d",&item_id);
@@ -278,34 +318,36 @@ void returnRequest(Queue *q) {
         if(return_quantity>loans[index].loan_quantity)
         {
             printf("归还数量多于借用数量！！\n");
-            return;
+            //return;
         }
         else
         {
             items[item_id-1].quantity+=return_quantity;
             shelves[items[item_id].shelve_id-2].ActualCapacity+=return_quantity;
-            enqueue(q,item_id,item_name,user_name,return_quantity);
+            
             updateReturnRecord(loans, loan_id, return_quantity);
             saveItemsToFile(items,numitems);
             saveShelvesFromFile(shelves,numshelves);
             saveLoanFile("loans.txt",loans,numloans);
+            printf("已添加到归还请求！\n");
         }
-        
+        //enqueue(q,item_id,item_name,user_name,return_quantity);
     }
-    
-
 }
+
+
 // 添加历史记录
 void addLoanRecord(Loan loans[], int loan_id, const char *user_name, const char *item_name, int loan_quantity) {
     loans[loan_id].loan_id = loan_id;
     strcpy(loans[loan_id].user_name , user_name);
     strcpy(loans[loan_id].item_name , item_name);
     loans[loan_id].loan_quantity = loan_quantity;
+    loans[loan_id].return_quantity=0;
     strcpy(loans[loan_id].status , "borrowed");
 }
 // 修改归还记录
 void updateReturnRecord(Loan loans[], int loan_id, int return_quantity) {
-    loans[loan_id].return_quantity = return_quantity;
+    loans[loan_id].return_quantity += return_quantity;
     strcpy(loans[loan_id].status, "Returned");
 }
 

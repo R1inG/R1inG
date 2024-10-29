@@ -1,6 +1,7 @@
-#include"Item_function.h"
+// #include"Item_function.h"
 #include"user_function.h"
-
+#include"loan_function.h"
+#include"graph.h"
 
 // 物品管理子菜单
 void itemManagementMenu() {
@@ -120,34 +121,115 @@ void admUserManagementMenu() {
 }
 
 
-// 借还管理子菜单
+// 借还管理子菜单（只能由管理员进行操作）
 void borrowReturnManagementMenu() {
+    Queue *borrowQueue = (Queue *)malloc(sizeof(Queue));
+    initQueue(borrowQueue);
+    Queue *returnQueue = (Queue *)malloc(sizeof(Queue));
+    initQueue(returnQueue);
     int choice=0;
     do {
         printf("\n物品借还管理：\n");
         printf("1. 借用物品\n");
         printf("2. 归还物品\n");
-        printf("3. 查看借用记录\n");
-        printf("4. 返回上一级菜单\n");
+        printf("3. 查看用户借用记录\n");
+        printf("4. 查询物品借用记录\n");
+        printf("5. 返回上一级菜单\n");
         printf("请输入选项：");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                printf("借用物品功能\n");
-                // borrowItem();
+            {
+                printf("借用归还物品功能（输入-1停止）\n");
+                Item items[100];
+                int numItem=readItemsFromFile(items,100);
+                Shelve shelves[100];
+                int numShelve=readShelvesFromFile(shelves,100);
+                int tag;
+                Loan loans[100];
+                int numLoans=readLoanFile("loans.txt",loans,100);
+                int loan_id0=numLoans;
+                int loan_id1;
+                int quantity;
+                int actreturnQuantity[100]={0};
+                int index0=1;
+                int index1=1;
+                do
+                {
+                    printf("输入0进行借用:\n");
+                    scanf("%d",&tag);
+                    if(tag==0)
+                    {
+                        borrowRequest(borrowQueue);
+                        QueueNode *newnode=copyQueueNodeAtIndex(borrowQueue,index0);
+                        if(items[newnode->item_id-1].quantity<newnode->quantity)
+                        {
+                            printf("你所借的物品库存量不足!\n");
+                            dequeue(borrowQueue);
+                            free(newnode);
+                        }
+                        else
+                        {
+                            items[newnode->item_id-1].quantity-=newnode->quantity;
+                            shelves[items[newnode->item_id].shelve_id-2].ActualCapacity-=newnode->quantity;
+                            printf("请记住您的借用码:%d\n", loan_id0);
+                            loan_id0++;
+                            index0++;
+                        }
+                        
+                    }
+                    
+                } while (tag!=-1);
+                showQueue(borrowQueue);
+                QueueNode *temp;
+                while (!isQueueEmpty(borrowQueue)) {
+                    temp = borrowQueue->front;
+                    dequeue(borrowQueue);
+                    addLoanRecord(loans, loan_id0-1, temp->user_name, temp->item_name, temp->quantity);
+                    loan_id0++;
+                    free(temp);
+                }
+                
+                // 一次性保存所有借用记录
+                saveLoanFile("loans.txt", loans, loan_id0-1);
+                saveItemsToFile(items, numItem);
+                saveShelvesFromFile(shelves, numShelve);
                 break;
+            }
             case 2:
+            {
                 printf("归还物品功能\n");
-                // returnItem();
+                returnRequest(returnQueue);
+
                 break;
+            }
             case 3:
-                printf("查看借用记录功能\n");
+            {
+                printf("查看用户借用记录功能\n");
+                char username[100];
+                printf("请输入需要查询的用户名：\n");
+                scanf("%99s",username);
+                searchLoanUsername("loans.txt",username);
                 // viewBorrowRecords();
                 break;
+            }
             case 4:
+            {
+                printf("查看物品借用记录功能\n");
+                char itemname[100];
+                printf("请输入需要查询的物品名：\n");
+                scanf("%99s",itemname);
+                searchLoanItem("loans.txt",itemname);
+
+                break;
+            }    
+            case 5:
+            {
                 printf("返回上一级菜单\n");
                 break;
+            }
+                
             default:
                 printf("无效选项，请重新选择。\n");
         }
@@ -156,6 +238,7 @@ void borrowReturnManagementMenu() {
 
 void warehouseLayoutAndNavigation() {
     int choice=0;
+    
     do {
         printf("\n仓库布局和导航功能\n");
         printf("1. 显示仓库布局\n");
@@ -171,7 +254,7 @@ void warehouseLayoutAndNavigation() {
                 break;
             case 2:
                 printf("显示导航信息\n");
-                // 
+
                 break;
             case 3:
                 printf("返回上一级菜单\n");
@@ -211,6 +294,8 @@ void dataStatisticsAndVisualization() {
 }
 
 // 管理员主菜单
+
+
 void adminMenu() {
     int choice=0;
     do {
